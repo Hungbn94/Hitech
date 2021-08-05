@@ -9,15 +9,7 @@ class CustomerController extends Controller
 {
     public function index(Request $request)
     {
-        if ($request->request->get('page') <> '')
-        {
-            $page = $request->get('page');
-            $customer = customers::orderBy('customers.CustomerCode')->skip(($page-1)*15)->take(15)->get();
-        }
-        else
-        {
-            $customer = customers::orderBy('customers.CustomerCode')->take(15)->get();
-        }
+        $customer = customers::orderBy('customers.CustomerCode')->paginate(15);
         if ($customer->count() > 0)
         {
             return response()->json($customer, 200);

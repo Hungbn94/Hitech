@@ -15,4 +15,9 @@ class products extends Model
     {
         return $this->hasMany('App\properties','ProductID','ProductID');
     }
+
+    public function customers()
+    {
+        return $this->belongsTo('App\customers','CustomerID');
+    }
 }

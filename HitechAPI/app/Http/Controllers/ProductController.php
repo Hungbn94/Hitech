@@ -7,22 +7,15 @@ use Illuminate\Support\Facades\DB;
 
 use App\products;
 use App\properties;
+use App\customers;
 
 class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        if ($request->request->get('page') <> '')
-        {
-            $page = $request->get('page');
-            $product = products::with('properties')
-                        ->orderBy('products.CustomerID')->orderBy('products.ProductID')->skip(($page-1)*15)->take(15)->get();
-        }
-        else
-        {
-            $product = products::with('properties')
-                        ->orderBy('products.CustomerID')->orderBy('products.ProductID')->take(15)->get();
-        }
+
+        $product = products::with('properties')
+                        ->orderBy('products.CustomerID')->orderBy('products.ProductID')->paginate(15);
         if ($product->count() > 0)
         {
             return response()->json($product, 200);
@@ -67,16 +60,26 @@ class ProductController extends Controller
 
     public function GetProductByCustomerId($CustomerId,Request $request)
     {
-        if ($request->request->get('page') <> '')
+        $product = products::with('properties')->where('CustomerId', $CustomerId)->orderBy('ProductID')->paginate(15);
+
+        if ($product->count() > 0)
         {
-            $page = $request->get('page');
-            $product = products::with('properties')->where('CustomerId', $CustomerId)->orderBy('CustomerID')->orderBy('ProductID')->skip(($page-1)*15)->take(15)->get();
+            return response()->json($product, 200);
         }
         else
         {
-            $product = products::with('properties')->where('CustomerId', $CustomerId)->orderBy('CustomerID')->orderBy('ProductID')->take(15)->get();
+            return response()->json([
+                'data' => 'Resource not found'
+            ], 404);
         }
+    }
 
+    public function GetProductByCustomerCode($CustomerCode,Request $request)
+    {
+        $product = products::with(['properties','customers'])->whereHas('customers', function ($query) use ($CustomerCode) {
+                                                                    $query->where('CustomerCode', '=', $CustomerCode);
+                                                                })
+                            ->orderBy('ProductID')->paginate(15);
         if ($product->count() > 0)
         {
             return response()->json($product, 200);
@@ -91,15 +94,7 @@ class ProductController extends Controller
 
     public function GetProductByName($ProductName,Request $request)
     {
-        if ($request->request->get('page') <> '')
-        {
-            $page = $request->get('page');
-            $product = products::with('properties')->where('ProductName', $ProductName)->orderBy('CustomerID')->orderBy('ProductID')->skip(($page-1)*15)->take(15)->get();
-        }
-        else
-        {
-            $product = products::with('properties')->where('ProductName', $ProductName)->orderBy('CustomerID')->orderBy('ProductID')->take(15)->get();
-        }
+        $product = products::with('properties')->where('ProductName', $ProductName)->orderBy('CustomerID')->orderBy('ProductID')->paginate(15);
 
         if ($product->count() > 0)
         {
@@ -115,15 +110,7 @@ class ProductController extends Controller
 
     public function GetProductByContractNumber($ContractNumber,Request $request)
     {
-        if ($request->request->get('page') <> '')
-        {
-            $page = $request->get('page');
-            $product = products::with('properties')->where('ContractNumber', $ContractNumber)->orderBy('CustomerID')->orderBy('ProductID')->skip(($page-1)*15)->take(15)->get();
-        }
-        else
-        {
-            $product = products::with('properties')->where('ContractNumber', $ContractNumber)->orderBy('CustomerID')->orderBy('ProductID')->take(15)->get();
-        }
+        $product = products::with('properties')->where('ContractNumber', $ContractNumber)->orderBy('CustomerID')->orderBy('ProductID')->paginate(15);
 
         if ($product->count() > 0)
         {
@@ -139,21 +126,10 @@ class ProductController extends Controller
 
     public function GetProductsByPropertiesName($PropertiesName,Request $request)
     {
-        if ($request->request->get('page') <> '')
-        {
-            $page = $request->get('page');
-            $product = products::with('properties')->whereHas('properties', function ($query) use ($PropertiesName) {
+        $product = products::with('properties')->whereHas('properties', function ($query) use ($PropertiesName) {
                                                         $query->where('PropertiesName', '=', $PropertiesName);
                                                     })
-                                ->orderBy('CustomerID')->orderBy('ProductID')->skip(($page-1)*15)->take(15)->get();
-        }
-        else
-        {
-            $product = products::with('properties')->whereHas('properties', function ($query) use ($PropertiesName) {
-                                                        $query->where('PropertiesName', '=', $PropertiesName);
-                                                    })
-                                ->orderBy('CustomerID')->orderBy('ProductID')->take(15)->get();
-        }
+                                ->orderBy('CustomerID')->orderBy('ProductID')->paginate(15);
 
         if ($product->count() > 0)
         {
@@ -169,13 +145,13 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        $product = products::create($request->all());
+        $product = products::with('properties')->create($request->all());
         return response()->json($product, 201);
     }
 
     public function update(Request $request, $ProductID)
     {
-        $product = products::where('ProductID', $ProductID)->get();
+        $product = products::with('properties')->where('ProductID', $ProductID)->get();
         if ($product->count() > 0)
         {
             $product->update($request->all());

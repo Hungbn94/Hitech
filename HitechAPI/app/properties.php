@@ -13,7 +13,7 @@ class properties extends Model
 
     public function products()
     {
-        return $this->belongTo('App\products','ProductID');
+        return $this->belongsTo('App\products','ProductID');
     }
 
 }
