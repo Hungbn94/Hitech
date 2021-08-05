@@ -10,15 +10,7 @@ class PropertyController extends Controller
 {
     public function index(Request $request)
     {
-        if ($request->request->get('page') <> '')
-        {
-            $page = $request->get('page');
-            $property = properties::orderBy('properties.PropertiesID')->skip(($page-1)*15)->take(15)->get();
-        }
-        else
-        {
-            $property = properties::orderBy('properties.PropertiesID')->take(15)->get();
-        }
+        $property = properties::orderBy('properties.PropertiesID')->paginate(15);
         if ($property->count() > 0)
         {
             return response()->json($property, 200);
@@ -33,15 +25,7 @@ class PropertyController extends Controller
 
     public function GetPropertyByID($PropertiesID)
     {
-        if ($request->request->get('page') <> '')
-        {
-            $page = $request->get('page');
-            $property = properties::where('PropertiesID', $PropertiesID)->skip(($page-1)*15)->take(15)->get();
-        }
-        else
-        {
-            $property = properties::where('PropertiesID', $PropertiesID)->take(15)->get();
-        }
+        $property = properties::where('PropertiesID', $PropertiesID)->paginate(15);
         
         if ($property->count() > 0)
         {
