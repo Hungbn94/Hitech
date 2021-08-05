@@ -23,9 +23,9 @@ class UsersTableSeeder extends Seeder
         for ($i = 0; $i < 50; $i++) {
             users::create([
                 'UserName' => $faker->firstName,
-                'Password' => $password,
+                'password' => $password,
                 'Name' => $faker->name,
-                'UserEmail' => $faker->email,
+                'email' => $faker->email,
                 'UserNumber' => $faker->phoneNumber,
                 'UserAdress' => $faker->address,
                 'Permission' => $faker->randomElement($array = array ('1','2','9')),

@@ -16,7 +16,7 @@
          *
          * @var array
          */
-        protected $fillable = ['UserName','Password','Name','UserEmail','UserNumber','UserAdress','Permission','Active'];
+        protected $fillable = ['UserName','password','Name','email','UserNumber','UserAdress','Permission','Active'];
 
         /**
          * The attributes that should be hidden for arrays.
@@ -24,7 +24,7 @@
          * @var array
          */
         protected $hidden = [
-            'Password', 'remember_token',
+            'password', 'remember_token',
         ];
 
         public function getJWTIdentifier()
