@@ -45,12 +45,12 @@ Route::group(['middleware' => 'auth.jwt'], function () {
     Route::put('customers/{CustomerID}', [CustomerController::class, 'update']);
     Route::delete('customers/{CustomerID}', [CustomerController::class, 'delete']);
     //Property
-    Route::get('properties', [PropertyController::class, 'index']);
-    Route::get('properties/{PropertiesID}', [PropertyController::class, 'GetPropertyByID']);
-    Route::get('properties/GetPropertyByProductID/{ProductID}', [PropertyController::class, 'GetPropertyByProductID']);
-    Route::post('properties', [PropertyController::class, 'store']);
-    Route::put('properties/{PropertiesID}', [PropertyController::class, 'update']);
-    Route::delete('properties/{PropertiesID}', [PropertyController::class, 'delete']);
+    //Route::get('properties', [PropertyController::class, 'index']);
+    //Route::get('properties/{PropertiesID}', [PropertyController::class, 'GetPropertyByID']);
+    //Route::get('properties/GetPropertyByProductID/{ProductID}', [PropertyController::class, 'GetPropertyByProductID']);
+    //Route::post('properties', [PropertyController::class, 'store']);
+    //Route::put('properties/{PropertiesID}', [PropertyController::class, 'update']);
+    //Route::delete('properties/{PropertiesID}', [PropertyController::class, 'delete']);
 });
 
 Route::get('products/GetProductByCustomerCode/{CustomerCode}', [ProductController::class, 'GetProductByCustomerCode']);

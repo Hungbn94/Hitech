@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\customers;
 
 class CustomerController extends Controller
@@ -86,40 +87,74 @@ class CustomerController extends Controller
 
     public function store(Request $request)
     {
-        $customer = customers::create($request->all());
-        return response()->json($customer, 201);
+        $faker = \Faker\Factory::create();
+        DB::beginTransaction();
+        try {
+            $customer = new customers;
+            while (true)
+            {
+                $temp = $faker->regexify('HITECH[0-9]{10}');
+                $_customer = customers::where('CustomerCode', $temp)->get();
+                if ($_customer->count() === 0)
+                {
+                    $customer->fill($request->all());
+                    $customer->CustomerCode = $temp;
+                    $customer->save();
+                    DB::commit();
+                    return response()->json($customer, 201);
+                }
+            }
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json(['data' => 'Resource not insert', 404]);
+        }
+        
     }
 
     public function update(Request $request, $customerID)
     {
-        $customer = customers::where('CustomerID', $customerID)->get();
-        if ($customer->count() > 0)
-        {
-            $customer->update($request->all());
-            return response()->json($null, 204);
-        }
-        else
-        {
-            return response()->json([
-                'data' => 'Resource not found'
-            ], 404);
+        DB::beginTransaction();
+        try {
+            $customer = customers::findOrFail($customerID);
+            if ($customer->count() > 0)
+            {
+                $input = $request->all();
+                $customer->fill($input)->save();
+                DB::commit();
+                return response()->json($customer, 200);
+            }
+            else
+            {
+                return response()->json([
+                    'data' => 'Resource not found'
+                ], 404);
+            }
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json(['data' => 'Resource not insert', 404]);
         }
     }
 
     public function delete($customerID)
     {
-        $customer = customers::where('CustomerID', $customerID)->get();
-        if ($customer->count() > 0)
-        {
-            $customer->delete();
-            return response()->json($null, 204);
+        DB::beginTransaction();
+        try {
+            $customer = customers::find($customerID);
+            if ($customer->count() > 0)
+            {
+                $customer->delete();
+                DB::commit();
+                return response()->json('Delete succcess',204);
+            }
+            else
+            {
+                return response()->json([
+                    'data' => 'Resource not found'
+                ], 404);
+            }
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json(['data' => 'Resource not insert', 404]);
         }
-        else
-        {
-            return response()->json([
-                'data' => 'Resource not found'
-            ], 404);
-        }
-        
     }
 }

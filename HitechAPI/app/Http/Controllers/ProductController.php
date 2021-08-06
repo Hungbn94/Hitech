@@ -145,40 +145,76 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        $product = products::with('properties')->create($request->all());
-        return response()->json($product, 201);
+        DB::beginTransaction();
+        try {
+            $product = products::create($request->all());
+            foreach ($request['properties'] as $property)
+            {
+                $temp = new properties;
+                $temp->fill($property);
+                $temp->ProductID = $product->ProductID;
+                $temp->save();
+            }
+            DB::commit();
+            return response()->json($product, 201);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json(['data' => 'Resource not insert', 404]);
+        }
     }
 
     public function update(Request $request, $ProductID)
     {
-        $product = products::with('properties')->where('ProductID', $ProductID)->get();
-        if ($product->count() > 0)
-        {
-            $product->update($request->all());
-            return response()->json($null, 204);
-        }
-        else
-        {
-            return response()->json([
-                'data' => 'Resource not found'
-            ], 404);
+        DB::beginTransaction();
+        try {
+            $product = products::findOrFail($ProductID);
+            if ($product->count() > 0)
+            {
+                $input = $request->all();
+                $product->fill($input)->save();
+                foreach ($request['properties'] as $property)
+                {
+                    $temp = properties::findOrFail($property['PropertiesID']);
+                    $temp->fill($property);
+                    $temp->ProductID = $product->ProductID;
+                    $temp->save();
+                }
+                DB::commit();
+                $product = products::with('properties')->findOrFail($ProductID);
+                return response()->json($product, 200);
+            }
+            else
+            {
+                return response()->json([
+                    'data' => 'Resource not found'
+                ], 404);
+            }
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json(['data' => 'Resource not update', 404]);
         }
     }
 
     public function delete($ProductID)
     {
-        $product = products::where('ProductID', $ProductID)->get();
-        if ($product->count() > 0)
-        {
-            $product->delete();
-            return response()->json($null, 204);
+        DB::beginTransaction();
+        try {
+            $product = products::with('properties')->findOrFail($ProductID);
+            if ($product->count() > 0)
+            {
+                products::destroy($ProductID);
+                DB::commit();
+                return response()->json('Delete succcess',204);
+            }
+            else
+            {
+                return response()->json([
+                    'data' => 'Resource not found'
+                ], 404);
+            }
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json(['data' => 'Resource not delete', 404]);
         }
-        else
-        {
-            return response()->json([
-                'data' => 'Resource not found'
-            ], 404);
-        }
-        
     }
 }
