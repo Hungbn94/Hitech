@@ -10,7 +10,33 @@ class CustomerController extends Controller
 {
     public function index(Request $request)
     {
-        $customer = customers::orderBy('customers.CustomerCode')->paginate(15);
+        $c = customers::query();
+        if ($request->has('CustomerCode'))
+        {
+            $p->where('CustomerCode',$request->get('CustomerCode'));
+        }
+
+        if ($request->has('CompanyName'))
+        {
+            $p->where('CompanyName','like','%'.$request->get('CompanyName').'%');
+        }
+
+        if ($request->has('ContactName'))
+        {
+            $p->where('ContactName','like','%'.$request->get('ContactName').'%');
+        }
+
+        if ($request->has('ContactNumber'))
+        {
+            $p->where('ContactNumber','like','%'.$request->get('ContactNumber').'%');
+        }
+
+        if ($request->has('ContactEmail'))
+        {
+            $p->where('ContactEmail','like','%'.$request->get('ContactEmail').'%');
+        }
+
+        $customer = $c->orderBy('customers.Active','desc')->orderBy('customers.CustomerCode')->paginate(15);
         if ($customer->count() > 0)
         {
             return response()->json($customer, 200);

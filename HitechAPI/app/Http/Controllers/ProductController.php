@@ -13,9 +13,40 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
+        $p = products::query()->with('properties');
+        if ($request->has('ProductCode'))
+        {
+            $p->where('ProductCode',$request->get('ProductCode'));
+        }
 
-        $product = products::with('properties')
-                        ->orderBy('products.CustomerID')->orderBy('products.ProductID')->paginate(15);
+        if ($request->has('CustomerID'))
+        {
+            $p->where('CustomerID',$request->get('CustomerID'));
+        }
+
+        if ($request->has('ContractNumber'))
+        {
+            $p->where('ContractNumber',$request->get('ContractNumber'));
+        }
+
+        if ($request->has('ProductName'))
+        {
+            $p->where('ProductName','like','%'.$request->get('ProductName').'%');
+        }
+
+        if ($request->has('ExternalForm'))
+        {
+            $p->where('ExternalForm',$request->get('ExternalForm'));
+        }
+
+        if ($request->has('PropertiesName'))
+        {
+            $p->whereHas('properties', function ($query) use ($request) {
+                $query->where('PropertiesName', 'like', '%'.$request->get('PropertiesName').'%');
+            });
+        }
+
+        $product = $p->orderBy('products.Active','desc')->orderBy('products.CustomerID')->orderBy('products.ProductID')->paginate(15);
         if ($product->count() > 0)
         {
             return response()->json($product, 200);
@@ -60,7 +91,7 @@ class ProductController extends Controller
 
     public function GetProductByCustomerId($CustomerId,Request $request)
     {
-        $product = products::with('properties')->where('CustomerId', $CustomerId)->orderBy('ProductID')->paginate(15);
+        $product = products::with('properties')->where('CustomerId', $CustomerId)->orderBy('products.Active','desc')->orderBy('ProductID')->paginate(15);
 
         if ($product->count() > 0)
         {
@@ -79,7 +110,7 @@ class ProductController extends Controller
         $product = products::with(['properties','customers'])->whereHas('customers', function ($query) use ($CustomerCode) {
                                                                     $query->where('CustomerCode', '=', $CustomerCode);
                                                                 })
-                            ->orderBy('ProductID')->paginate(15);
+                                                                ->orderBy('products.Active','desc')->orderBy('ProductID')->paginate(15);
         if ($product->count() > 0)
         {
             return response()->json($product, 200);
@@ -94,7 +125,7 @@ class ProductController extends Controller
 
     public function GetProductByName($ProductName,Request $request)
     {
-        $product = products::with('properties')->where('ProductName', $ProductName)->orderBy('CustomerID')->orderBy('ProductID')->paginate(15);
+        $product = products::with('properties')->where('ProductName', $ProductName)->orderBy('products.Active','desc')->orderBy('CustomerID')->orderBy('ProductID')->paginate(15);
 
         if ($product->count() > 0)
         {
@@ -110,7 +141,7 @@ class ProductController extends Controller
 
     public function GetProductByContractNumber($ContractNumber,Request $request)
     {
-        $product = products::with('properties')->where('ContractNumber', $ContractNumber)->orderBy('CustomerID')->orderBy('ProductID')->paginate(15);
+        $product = products::with('properties')->where('ContractNumber', $ContractNumber)->orderBy('products.Active','desc')->orderBy('CustomerID')->orderBy('ProductID')->paginate(15);
 
         if ($product->count() > 0)
         {
@@ -127,9 +158,9 @@ class ProductController extends Controller
     public function GetProductsByPropertiesName($PropertiesName,Request $request)
     {
         $product = products::with('properties')->whereHas('properties', function ($query) use ($PropertiesName) {
-                                                        $query->where('PropertiesName', '=', $PropertiesName);
+                                                        $query->where('PropertiesName', 'like', '%'.$PropertiesName.'%');
                                                     })
-                                ->orderBy('CustomerID')->orderBy('ProductID')->paginate(15);
+                                                    ->orderBy('products.Active','desc')->orderBy('CustomerID')->orderBy('ProductID')->paginate(15);
 
         if ($product->count() > 0)
         {
