@@ -13,27 +13,27 @@ class CustomerController extends Controller
         $c = customers::query();
         if ($request->has('CustomerCode'))
         {
-            $p->where('CustomerCode',$request->get('CustomerCode'));
+            $c->where('CustomerCode',$request->get('CustomerCode'));
         }
 
         if ($request->has('CompanyName'))
         {
-            $p->where('CompanyName','like','%'.$request->get('CompanyName').'%');
+            $c->where('CompanyName','like','%'.$request->get('CompanyName').'%');
         }
 
         if ($request->has('ContactName'))
         {
-            $p->where('ContactName','like','%'.$request->get('ContactName').'%');
+            $c->where('ContactName','like','%'.$request->get('ContactName').'%');
         }
 
         if ($request->has('ContactNumber'))
         {
-            $p->where('ContactNumber','like','%'.$request->get('ContactNumber').'%');
+            $c->where('ContactNumber','like','%'.$request->get('ContactNumber').'%');
         }
 
         if ($request->has('ContactEmail'))
         {
-            $p->where('ContactEmail','like','%'.$request->get('ContactEmail').'%');
+            $c->where('ContactEmail','like','%'.$request->get('ContactEmail').'%');
         }
 
         $customer = $c->orderBy('customers.Active','desc')->orderBy('customers.CustomerCode')->paginate(15);
