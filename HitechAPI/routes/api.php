@@ -5,6 +5,7 @@ Use App\Http\Controllers\CustomerController;
 Use App\Http\Controllers\PropertyController;
 Use App\Http\Controllers\UserController;
 Use App\Http\Controllers\APIController;
+Use App\Http\Controllers\MailController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -54,6 +55,7 @@ Route::group(['middleware' => 'auth.jwt'], function () {
 });
 
 Route::get('products/GetProductByCustomerCode/{CustomerCode}', [ProductController::class, 'GetProductByCustomerCode']);
+Route::post('mail', [MailController::class, 'sendMail']);
 
 
 
