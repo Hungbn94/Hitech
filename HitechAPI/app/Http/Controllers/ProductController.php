@@ -13,7 +13,7 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $p = products::query()->with('properties');
+        $p = products::query()->with(['properties','customers']);
         if ($request->has('ProductCode'))
         {
             $p->where('ProductCode',$request->get('ProductCode'));
@@ -61,7 +61,7 @@ class ProductController extends Controller
  
     public function GetProductByID($ProductID)
     {
-        $product = products::with('properties')->where('ProductID', $ProductID)->get();
+        $product = products::with(['properties','customers'])->where('ProductID', $ProductID)->get();
         if ($product->count() > 0)
         {
             return response()->json($product, 200);
@@ -76,7 +76,7 @@ class ProductController extends Controller
 
     public function GetProductByCode($ProductCode)
     {
-        $product = products::with('properties')->where('ProductCode', $ProductCode)->get();
+        $product = products::with(['properties','customers'])->where('ProductCode', $ProductCode)->get();
         if ($product->count() > 0)
         {
             return response()->json($product, 200);
@@ -91,7 +91,7 @@ class ProductController extends Controller
 
     public function GetProductByCustomerId($CustomerId,Request $request)
     {
-        $product = products::with('properties')->where('CustomerId', $CustomerId)->orderBy('products.Active','desc')->orderBy('ProductID')->paginate(15);
+        $product = products::with(['properties','customers'])->where('CustomerId', $CustomerId)->orderBy('products.Active','desc')->orderBy('ProductID')->paginate(15);
 
         if ($product->count() > 0)
         {
@@ -125,7 +125,7 @@ class ProductController extends Controller
 
     public function GetProductByName($ProductName,Request $request)
     {
-        $product = products::with('properties')->where('ProductName', $ProductName)->orderBy('products.Active','desc')->orderBy('CustomerID')->orderBy('ProductID')->paginate(15);
+        $product = products::with(['properties','customers'])->where('ProductName', $ProductName)->orderBy('products.Active','desc')->orderBy('CustomerID')->orderBy('ProductID')->paginate(15);
 
         if ($product->count() > 0)
         {
@@ -141,7 +141,7 @@ class ProductController extends Controller
 
     public function GetProductByContractNumber($ContractNumber,Request $request)
     {
-        $product = products::with('properties')->where('ContractNumber', $ContractNumber)->orderBy('products.Active','desc')->orderBy('CustomerID')->orderBy('ProductID')->paginate(15);
+        $product = products::with(['properties','customers'])->where('ContractNumber', $ContractNumber)->orderBy('products.Active','desc')->orderBy('CustomerID')->orderBy('ProductID')->paginate(15);
 
         if ($product->count() > 0)
         {
@@ -157,7 +157,7 @@ class ProductController extends Controller
 
     public function GetProductsByPropertiesName($PropertiesName,Request $request)
     {
-        $product = products::with('properties')->whereHas('properties', function ($query) use ($PropertiesName) {
+        $product = products::with(['properties','customers'])->whereHas('properties', function ($query) use ($PropertiesName) {
                                                         $query->where('PropertiesName', 'like', '%'.$PropertiesName.'%');
                                                     })
                                                     ->orderBy('products.Active','desc')->orderBy('CustomerID')->orderBy('ProductID')->paginate(15);
@@ -190,7 +190,7 @@ class ProductController extends Controller
             return response()->json($product, 201);
         } catch (\Throwable $th) {
             DB::rollBack();
-            return response()->json(['data' => 'Resource not insert', 404]);
+            return response()->json(['data' => 'Resource not insert'], 404);
         }
     }
 
@@ -222,7 +222,7 @@ class ProductController extends Controller
             }
         } catch (\Throwable $th) {
             DB::rollBack();
-            return response()->json(['data' => 'Resource not update', 404]);
+            return response()->json(['data' => 'Resource not update'], 404);
         }
     }
 
@@ -245,7 +245,7 @@ class ProductController extends Controller
             }
         } catch (\Throwable $th) {
             DB::rollBack();
-            return response()->json(['data' => 'Resource not delete', 404]);
+            return response()->json(['data' => 'Resource not delete'], 404);
         }
     }
 }

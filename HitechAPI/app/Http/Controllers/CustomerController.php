@@ -132,7 +132,7 @@ class CustomerController extends Controller
             }
         } catch (\Throwable $th) {
             DB::rollBack();
-            return response()->json(['data' => 'Resource not insert', 404]);
+            return response()->json(['data' => 'Resource not insert'], 404);
         }
         
     }
@@ -157,7 +157,7 @@ class CustomerController extends Controller
             }
         } catch (\Throwable $th) {
             DB::rollBack();
-            return response()->json(['data' => 'Resource not update', 404]);
+            return response()->json(['data' => 'Resource not update'], 404);
         }
     }
 
@@ -180,7 +180,7 @@ class CustomerController extends Controller
             }
         } catch (\Throwable $th) {
             DB::rollBack();
-            return response()->json(['data' => 'Resource not delete', 404]);
+            return response()->json(['data' => 'Resource not delete'], 404);
         }
     }
 }
