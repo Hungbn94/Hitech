@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+
 use App\products;
 use App\properties;
 use App\customers;
@@ -190,7 +191,7 @@ class ProductController extends Controller
             return response()->json($product, 201);
         } catch (\Throwable $th) {
             DB::rollBack();
-            return response()->json(['data' => 'Resource not insert'], 404);
+            return response()->json($th, 404);
         }
     }
 
@@ -222,7 +223,7 @@ class ProductController extends Controller
             }
         } catch (\Throwable $th) {
             DB::rollBack();
-            return response()->json(['data' => 'Resource not update'], 404);
+            return response()->json($th, 404);
         }
     }
 
@@ -245,7 +246,7 @@ class ProductController extends Controller
             }
         } catch (\Throwable $th) {
             DB::rollBack();
-            return response()->json(['data' => 'Resource not delete'], 404);
+            return response()->json($th, 404);
         }
     }
 }
