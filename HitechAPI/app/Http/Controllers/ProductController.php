@@ -193,7 +193,7 @@ class ProductController extends Controller
                 $temp->save();
             }
             DB::commit();
-            $product = products::with(['properties','customers'])->findOrFail($product->ProductID);
+            $product = products::with(['properties','customers'])->find($product->ProductID);
             return response()->json($product, 201);
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -205,10 +205,16 @@ class ProductController extends Controller
     {
         DB::beginTransaction();
         try {
-            $product = products::findOrFail($ProductID);
+            $product = products::with(['properties','customers'])->find($ProductID);
             if ($product->count() > 0)
             {
                 $customerID = customers::where('CustomerCode', $request->CustomerCode)->value('CustomerID');
+                if (is_null($customerID))
+                {
+                    return response()->json([
+                        'data' => 'CustomerCode not found'
+                    ], 404);
+                }
                 $input = $request->all();
                 $product->fill($input);
                 $product->CustomerID = $customerID;
@@ -216,13 +222,17 @@ class ProductController extends Controller
 
                 foreach ($request['properties'] as $property)
                 {
-                    $temp = properties::firstOrNew($property['PropertiesID']);
+                    $temp = properties::find($property['PropertiesID']);
+                    if (is_null($temp))
+                    {
+                        $temp = new properties;
+                    }
                     $temp->fill($property);
                     $temp->ProductID = $product->ProductID;
                     $temp->save();
                 }
                 DB::commit();
-                $product = products::with(['properties','customers'])->findOrFail($ProductID);
+                $product = products::with(['properties','customers'])->find($ProductID);
                 return response()->json($product, 200);
             }
             else
@@ -241,7 +251,7 @@ class ProductController extends Controller
     {
         DB::beginTransaction();
         try {
-            $product = products::with('properties')->findOrFail($ProductID);
+            $product = products::with('properties')->find($ProductID);
             if ($product->count() > 0)
             {
                 products::destroy($ProductID);

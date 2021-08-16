@@ -141,7 +141,7 @@ class CustomerController extends Controller
     {
         DB::beginTransaction();
         try {
-            $customer = customers::findOrFail($customerID);
+            $customer = customers::find($customerID);
             if ($customer->count() > 0)
             {
                 $input = $request->all();
