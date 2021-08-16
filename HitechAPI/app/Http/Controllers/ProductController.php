@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
+use Carbon\Carbon;
 
 use App\products;
 use App\properties;
@@ -179,7 +179,12 @@ class ProductController extends Controller
     {
         DB::beginTransaction();
         try {
-            $product = products::create($request->all());
+            $customerID = customers::where('CustomerCode', $request->CustomerCode)->value('CustomerID');
+            $product = new products;
+            $input = $request->all();
+            $product->fill($input);
+            $product->CustomerID = $customerID;
+            $product->save();
             foreach ($request['properties'] as $property)
             {
                 $temp = new properties;
@@ -188,6 +193,7 @@ class ProductController extends Controller
                 $temp->save();
             }
             DB::commit();
+            $product = products::with(['properties','customers'])->findOrFail($product->ProductID);
             return response()->json($product, 201);
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -202,17 +208,21 @@ class ProductController extends Controller
             $product = products::findOrFail($ProductID);
             if ($product->count() > 0)
             {
+                $customerID = customers::where('CustomerCode', $request->CustomerCode)->value('CustomerID');
                 $input = $request->all();
-                $product->fill($input)->save();
+                $product->fill($input);
+                $product->CustomerID = $customerID;
+                $product->save();
+
                 foreach ($request['properties'] as $property)
                 {
-                    $temp = properties::findOrFail($property['PropertiesID']);
+                    $temp = properties::firstOrNew($property['PropertiesID']);
                     $temp->fill($property);
                     $temp->ProductID = $product->ProductID;
                     $temp->save();
                 }
                 DB::commit();
-                $product = products::with('properties')->findOrFail($ProductID);
+                $product = products::with(['properties','customers'])->findOrFail($ProductID);
                 return response()->json($product, 200);
             }
             else
